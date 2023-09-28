@@ -1,13 +1,15 @@
 import mongoose from 'mongoose';
-import 'dotenv/config';
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+import { config } from 'dotenv';
+import logger from './logger';
+config()
+
 export default async () => {
   try {
-    const mongoUri = (process.env.MONGO_URI ?? 'mongodb://localhost:27017/test')
+    const mongoUri = (process.env.MONGO_URI ?? 'mongo:27017/test')
     // Connect to MongoDB
     await mongoose.connect(mongoUri)
-    console.log('DB connected')
+    logger.info('DB connected')
   } catch (error: any) {
-    console.log(`Error -> ${error}`)
+    logger.error(`Error -> ${error}`)
   }
 }
