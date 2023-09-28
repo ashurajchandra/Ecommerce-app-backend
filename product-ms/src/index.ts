@@ -1,13 +1,13 @@
 import app from './app';
 import intiDb from './configs/db';
-import 'dotenv/config';
-
+import { config } from 'dotenv';
+import logger from './configs/logger';
 
 const port = process.env.PORT || 8000;
 async function startServer () {
     await intiDb()
     app.listen(port, () => {
-      console.info(`Server is running on port ${port}`)
+      logger.info(`Server is running on port ${port}`)
     })
   }
   

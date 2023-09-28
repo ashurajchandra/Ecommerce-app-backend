@@ -1,19 +1,21 @@
 // controllers/productController.ts
 import { Request, Response, NextFunction } from 'express';
-import Product, { IProduct ,productValidationSchema} from '../models/product.model';
+import Product, { IProduct ,productValidationSchema} from '../models/Product';
+import CustomError from '../errors/custom-error';
 
 // Create a new product
 export const createProduct = async (
   req: Request,
   res: Response,
+  next: NextFunction
 ) => {
   try {
-
-        // Validate the request data
-        const { error } = productValidationSchema.validate(req.body);
-        if (error) {
-          return res.status(400).json({ error: error.details[0].message });
-        }
+    // Validate the request data
+    const { error } = productValidationSchema.validate(req.body);
+    if (error) {
+      const validationError =  new CustomError(error.details[0].message, 400);
+      throw validationError;
+    }
 
     const { name, description, price, quantity } = req.body;
     const product: IProduct = await  Product.create({
@@ -24,7 +26,7 @@ export const createProduct = async (
     });
     res.status(201).json(product);
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 };
 
@@ -32,40 +34,37 @@ export const createProduct = async (
 export const getAllProducts = async (
   req: Request,
   res: Response,
+  next: NextFunction
 ) => {
   try {
     const products = await Product.find();
     res.json(products);
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 };
 
 // Update a product by ID
 export const updateProduct = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
-       // Validate the request data
-    //    const { error } = productValidationSchema.validate(req.body);
-    //    if (error) {
-    //      return res.status(400).json({ error: error.details[0].message });
-    //    }
     const { id } = req.params;
     const { name, description, price, quantity } = req.body;
-    console.log("hiii",name)
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       { name, description, price, quantity },
       { new: true }
     );
     if (!updatedProduct) {
-      return res.status(404).json({ message: 'Product not found' });
+      const validationError =  new CustomError('Product not found', 404);
+      throw validationError;
     }
     res.json(updatedProduct);
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+   next(err);
   }
 };
 
@@ -79,23 +78,25 @@ export const deleteProduct = async (
     const { id } = req.params;
     const deletedProduct = await Product.findByIdAndRemove(id);
     if (!deletedProduct) {
-      return res.status(404).json({ message: 'Product not found' });
+      const validationError =  new CustomError('Product not found', 404);
+      throw validationError;
     }
     res.json({ message: 'Product deleted' });
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 };
 
 // Get a single product by ID
-export const getProductDetail = async (req: Request, res: Response) => {
+export const getProductDetail = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const product = await Product.findById(req.params.id);
       if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
+        const validationError =  new CustomError('Product not found', 400);
+        throw validationError;
       }
       res.json(product);
     } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
-    }
+      next(error);
   }
+}

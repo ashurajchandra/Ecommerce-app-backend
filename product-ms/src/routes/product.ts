@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
-import Product, { productValidationSchema, IProduct } from '../models/product.model';
-import {createProduct,getAllProducts,updateProduct,deleteProduct,getProductDetail} from "../controllers/products.controller"
+import Product, { productValidationSchema, IProduct } from '../models/Product';
+import {createProduct,getAllProducts,updateProduct,deleteProduct,getProductDetail} from "../controllers/products-controller"
 const router = express.Router();
 
 // Create a new product
